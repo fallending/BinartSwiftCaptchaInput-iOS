@@ -2,6 +2,7 @@ use_frameworks!
 
 target 'BinartSwiftCaptchaInput_Example' do
   pod 'BinartSwiftCaptchaInput', :path => '../'
+  pod 'BinartSwiftCaptchaInput/RxSwift', :path => '../'
 
   target 'BinartSwiftCaptchaInput_Tests' do
     inherit! :search_paths
