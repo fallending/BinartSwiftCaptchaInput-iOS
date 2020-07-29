@@ -30,18 +30,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '9.0'
 
-  s.default_subspec = "Core"
-
-  s.subspec "Core" do |ss|
-    ss.source_files = 'BinartSwiftCaptchaInput/Classes/Core/*'
-    ss.frameworks = 'UIKit'
-  end
-
-  s.subspec "RxSwift" do |ss|
-    ss.source_files = "BinartSwiftCaptchaInput/Classes/RxSwift/*"
-
-    ss.dependency "BinartSwiftCaptchaInput/Core"
-    ss.dependency "RxSwift"
-    ss.dependency "RxCocoa"
-  end
+  s.source_files = 'BinartSwiftCaptchaInput/Classes/*'
+  s.frameworks = 'UIKit'
+  
 end
