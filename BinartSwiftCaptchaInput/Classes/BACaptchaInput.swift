@@ -141,9 +141,17 @@ open class BACaptchaInput: UIControl {
         stackView.spacing = separatorSpace
         
         //
-		stackView.frame = self.bounds
+//		stackView.frame = self.bounds
 		if stackView.superview == nil {
 			addSubview(stackView)
+            
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+            stackView.superview?.addConstraints([
+                NSLayoutConstraint(item: stackView, attribute: .width, relatedBy: .equal, toItem: stackView.superview, attribute: .width, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint(item: stackView, attribute: .height, relatedBy: .equal, toItem: stackView.superview, attribute: .height, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint(item: stackView, attribute: .centerY, relatedBy: .equal, toItem: stackView.superview, attribute: .centerY, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint(item: stackView, attribute: .centerX, relatedBy: .equal, toItem: stackView.superview, attribute: .centerX, multiplier: 1.0, constant: 0)
+            ]);
 		}
 		stackView.arrangedSubviews.forEach{($0.removeFromSuperview())}
 
