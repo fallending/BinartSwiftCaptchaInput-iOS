@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'BinartSwiftCaptchaInput'
-  s.version          = '0.1.2'
+  s.version          = '0.1.4'
   s.summary          = 'Captcha input view for iOS, Swift.'
   s.description      = <<-DESC
 Captcha input view for iOS, Swift. Pity, it's still experimental.

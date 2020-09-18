@@ -68,11 +68,11 @@ open class BACaptchaInput: UIControl {
     
     /// 无输入颜色
     @IBInspectable
-    open var emptyFieldBorderColor: UIColor = .lightGray
+    open var emptyFieldBorderColor: UIColor = UIColor(red: 84/255, green: 85/255, blue: 86/255, alpha: 1.0)
     
     /// 有输入颜色
     @IBInspectable
-    open var enteredFieldBorderColor: UIColor = .lightGray
+    open var enteredFieldBorderColor: UIColor = .white
     
     /// 特殊反馈颜色变化
     @IBInspectable
@@ -85,7 +85,7 @@ open class BACaptchaInput: UIControl {
     
     /// 文字颜色
     @IBInspectable
-    open var textColor: UIColor = .lightGray
+    open var textColor: UIColor = .white
     
     /// 加载则获取第一响应者
     @IBInspectable
@@ -298,7 +298,12 @@ open class BACaptchaInput: UIControl {
             let t = $0 as! BACaptchaInputTextField
             
             t.textColor = textColor
-            t.borderView?.backgroundColor = emptyFieldBorderColor
+            
+            if ((t.text?.count) != nil) {
+                t.borderView?.backgroundColor = enteredFieldBorderColor
+            } else {
+                t.borderView?.backgroundColor = emptyFieldBorderColor
+            }
         }
         
         feedbackTriggerred = false
