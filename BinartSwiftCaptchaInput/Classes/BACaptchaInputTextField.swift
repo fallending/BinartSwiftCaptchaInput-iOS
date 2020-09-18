@@ -83,6 +83,18 @@ class BACaptchaInputTextField : UITextField {
             // 什么都不做，保持光标在当前 输入框
         }
     }
+    
+    //                usingSpringWithDamping：弹簧动画的阻尼值，也就是相当于摩擦力的大小，该属性的值从0.0到1.0之间，越靠近0，阻尼越小，弹动的幅度越大，反之阻尼越大，弹动的幅度越小，如果大道一定程度，会出现弹不动的情况。
+    //                initialSpringVelocity：弹簧动画的速率，或者说是动力。值越小弹簧的动力越小，弹簧拉伸的幅度越小，反之动力越大，弹簧拉伸的幅度越大。这里需要注意的是，如果设置为0，表示忽略该属性，由动画持续时间和阻尼计算动画的效果
+    func highlight (animated: Bool) {
+        if animated {
+            UIView.animate(withDuration: 1.0, delay: 0.2, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: .allowUserInteraction, animations: {
+                self.borderView?.backgroundColor = self.highlightBorderColor
+            }, completion: nil)
+        } else {
+            borderView?.backgroundColor = highlightBorderColor
+        }
+    }
 }
 
 public extension UIView {

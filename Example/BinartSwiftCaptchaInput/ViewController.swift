@@ -30,5 +30,11 @@ class ViewController: UIViewController, BACaptchaInputDelegate {
     func onCaptchaInputComplete(captchaInput: BACaptchaInput, didFinishInput captchaCode: String) {
         print(captchaCode)
     }
+    
+    // MARK: - Action Handler
+    
+    @IBAction func onCaptchaError() {
+        captchaInput.feedback()
+    }
 }
 

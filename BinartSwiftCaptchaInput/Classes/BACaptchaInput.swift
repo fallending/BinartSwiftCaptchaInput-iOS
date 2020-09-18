@@ -13,14 +13,14 @@ public protocol BACaptchaInputDelegate: class {
 @IBDesignable
 open class BACaptchaInput: UIControl {
     
-    /// Different display type for text fields.
+    /// 显示模式
     public enum DisplayType {
         case box
         case underlined
         case round
     }
     
-    /// Different input type for OTP fields.
+    /// 输入模式
     public enum KeyboardType: Int {
         case numeric
         case alphabet
@@ -34,13 +34,13 @@ open class BACaptchaInput: UIControl {
         case none = ""
     }
     
-    // MARK: = Configurations
+    // MARK: = 配置项
     
-    /// Define the display type for OTP fields.
     open var fieldDisplayType: DisplayType = .underlined
-    
-    ///
     open var fieldInputType: KeyboardType = .numeric
+    
+    /// 安全输入的替代显示图标
+    open var secureEntrySymbol: SecureEntryDisplayType = .none
     
     /// Define the font to be used to OTP field.
     @IBInspectable
@@ -50,11 +50,11 @@ open class BACaptchaInput: UIControl {
     @IBInspectable
     open var isSecureEntry: Bool = false
     
-    /// If set to `false`, the blinking cursor for OTP field will not be visible. Defaults to `true`.
+    /// 是否需要光标
     @IBInspectable
     open var requireCursor: Bool = true
     
-    /// For setting cursor color, if `requireCursor` is set to true.
+    /// 光标颜色
     @IBInspectable
     open var cursorColor: UIColor = .white
     
@@ -66,39 +66,43 @@ open class BACaptchaInput: UIControl {
     @IBInspectable
     open var borderWidth: CGFloat = 2
     
-    /// Set this value if a border color is needed when a text is not enetered in the OTP field.
+    /// 无输入颜色
     @IBInspectable
     open var emptyFieldBorderColor: UIColor = .lightGray
     
-    /// Set this value if a border color is needed when a text is enetered in the OTP field.
+    /// 有输入颜色
     @IBInspectable
-    open var enteredFieldBorderColor: UIColor = UIColor(red: 225/255, green: 73/255, blue: 73/255, alpha: 1)
+    open var enteredFieldBorderColor: UIColor = .lightGray
     
-    /// 安全输入的替代显示图标
-    open var secureEntrySymbol: SecureEntryDisplayType = .none
+    /// 特殊反馈颜色变化
+    @IBInspectable
+    open var feedbackColor: UIColor = UIColor(red: 236/255, green: 43/255, blue: 78/255, alpha: 1.0)
+    
     
     /// 安全输入的替代显示图标颜色
     @IBInspectable
     open var secureEntrySymbolColor: UIColor = UIColor(red: 236/255, green: 43/255, blue: 78/255, alpha: 1.0)
     
-    /// Text Color for text field
+    /// 文字颜色
     @IBInspectable
-    open var textColor: UIColor = UIColor(red: 225/255, green: 73/255, blue: 73/255, alpha: 1)
+    open var textColor: UIColor = .lightGray
     
     /// 加载则获取第一响应者
     @IBInspectable
-    open var isTextfieldBecomFirstResponder = true
+    open var autoFirstResponder = true
     
+    /// 验证码数目
 	@IBInspectable open var fieldsCount: Int = 4 {
 		didSet {
 			setupUI()
 		}
 	}
-
+    
     // MARK: =
     
 	@IBOutlet open weak var delegate: BACaptchaInputDelegate?
 
+    /// 验证码容器视图
 	var stackView: UIStackView = {
 		let stackView = UIStackView()
 		stackView.axis = .horizontal
@@ -106,6 +110,8 @@ open class BACaptchaInput: UIControl {
         stackView.alignment = .fill
 		return stackView
 	}()
+    
+    fileprivate var feedbackTriggerred: Bool = false
 
 	fileprivate var items: [BACaptchaInputTextField] = []
 	open var code: String {
@@ -133,15 +139,19 @@ open class BACaptchaInput: UIControl {
 
 		let tap = UITapGestureRecognizer(target: self, action: #selector(becomeFirstResponder))
 		addGestureRecognizer(tap)
+        
+        // 自动获取焦点
+        if (autoFirstResponder) {
+            if let item = stackView.arrangedSubviews.first {
+                item.becomeFirstResponder()
+            }
+        }
 	}
 
     // 初始化UI
 	fileprivate func setupUI() {
-        // stackView 设置
         stackView.spacing = separatorSpace
         
-        //
-//		stackView.frame = self.bounds
 		if stackView.superview == nil {
 			addSubview(stackView)
             
@@ -246,8 +256,16 @@ open class BACaptchaInput: UIControl {
         
         textField.becomeFirstResponder()
     }
+
+    fileprivate func check() {
+        let captchaCode = code
+        if (captchaCode.count == fieldsCount) {
+            delegate?.onCaptchaInputComplete(captchaInput: self, didFinishInput: captchaCode)
+        }
+    }
     
-    // For clear all entered OTP
+    // MARK: - Public Mehtods
+    
     public func clear() {
         for index in stride(from: 0, to: fieldsCount, by: 1) {
             
@@ -257,11 +275,33 @@ open class BACaptchaInput: UIControl {
         }
     }
     
-    fileprivate func check() {
-        let captchaCode = code
-        if (captchaCode.count == fieldsCount) {
-            delegate?.onCaptchaInputComplete(captchaInput: self, didFinishInput: captchaCode)
+    public func feedback () {
+        // 如果没有输入完全，调用则没有效果
+        if code.count < fieldsCount {
+            return
         }
+        
+        // 默认方式用颜色
+        stackView.arrangedSubviews.forEach {
+            let t = $0 as! BACaptchaInputTextField
+            
+            t.textColor = feedbackColor
+            t.borderView?.backgroundColor = feedbackColor
+        }
+        
+        feedbackTriggerred = true
+    }
+    
+    public func resetFeedback () {
+        // 默认方式用颜色
+        stackView.arrangedSubviews.forEach {
+            let t = $0 as! BACaptchaInputTextField
+            
+            t.textColor = textColor
+            t.borderView?.backgroundColor = emptyFieldBorderColor
+        }
+        
+        feedbackTriggerred = false
     }
 }
 
@@ -269,8 +309,6 @@ open class BACaptchaInput: UIControl {
 
 extension BACaptchaInput: UITextFieldDelegate {
     
-    
-
 	public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
         if string.hasSuffix("\n") {
@@ -278,6 +316,10 @@ extension BACaptchaInput: UITextFieldDelegate {
         }
 
 		if string == "" { //is backspace
+            if feedbackTriggerred {
+                resetFeedback()
+            }
+            
 			return true
 		}
         
@@ -286,6 +328,10 @@ extension BACaptchaInput: UITextFieldDelegate {
         // Check since only alphabet keyboard is not available in iOS
         if !replacedText.isEmpty && fieldInputType == .alphabet && replacedText.rangeOfCharacter(from: .letters) == nil {
             return false
+        }
+        
+        if feedbackTriggerred {
+            resetFeedback()
         }
         
         if replacedText.count >= 1 {
@@ -328,12 +374,7 @@ extension BACaptchaInput: UITextFieldDelegate {
             
             if let txt = viewWithTag(textField.tag) as? BACaptchaInputTextField, fieldDisplayType == .underlined {
                 
-//                usingSpringWithDamping：弹簧动画的阻尼值，也就是相当于摩擦力的大小，该属性的值从0.0到1.0之间，越靠近0，阻尼越小，弹动的幅度越大，反之阻尼越大，弹动的幅度越小，如果大道一定程度，会出现弹不动的情况。
-//                initialSpringVelocity：弹簧动画的速率，或者说是动力。值越小弹簧的动力越小，弹簧拉伸的幅度越小，反之动力越大，弹簧拉伸的幅度越大。这里需要注意的是，如果设置为0，表示忽略该属性，由动画持续时间和阻尼计算动画的效果
-                UIView.animate(withDuration: 1.0, delay: 0.2, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: .allowUserInteraction, animations: {
-                    txt.borderView?.backgroundColor = self.enteredFieldBorderColor
-                }, completion: nil)
-                
+                txt.highlight(animated: true)
             }
             
             let nextOTPField = viewWithTag(textField.tag + 1)
@@ -365,6 +406,8 @@ extension BACaptchaInput: UITextFieldDelegate {
                 }
             }
         }
+        
+        
         
         return false
 	}

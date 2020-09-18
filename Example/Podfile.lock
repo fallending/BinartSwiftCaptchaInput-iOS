@@ -1,5 +1,5 @@
 PODS:
-  - BinartSwiftCaptchaInput (0.1.0)
+  - BinartSwiftCaptchaInput (0.1.2)
   - FBSnapshotTestCase (2.1.4):
     - FBSnapshotTestCase/SwiftSupport (= 2.1.4)
   - FBSnapshotTestCase/Core (2.1.4)
@@ -32,7 +32,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  BinartSwiftCaptchaInput: e5aca380cb4a116fbc9fc4cd15b1bd7745294d02
+  BinartSwiftCaptchaInput: 0bfe4bd599d7c91d5aa4dd30ac089dbdf3f6af4e
   FBSnapshotTestCase: 094f9f314decbabe373b87cc339bea235a63e07a
   Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
   Nimble-Snapshots: f5459b5b091678dc942d03ec4741cacb58ba4a52
@@ -40,4 +40,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: fcadf47c348fcac0ab8620f6c65741c824d044ea
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.3
