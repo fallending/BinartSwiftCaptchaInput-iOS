@@ -142,9 +142,14 @@ open class BACaptchaInput: UIControl {
         
         // 自动获取焦点
         if (autoFirstResponder) {
-            if let item = stackView.arrangedSubviews.first {
-                item.becomeFirstResponder()
-            }
+            // 注意：直接获取，光标不亮
+//            if let item = stackView.arrangedSubviews.first {
+//                item.becomeFirstResponder()
+//            }
+            // 注意：直接获取，光标不亮
+//            perform(#selector(becomeFirstResponder))
+            
+            perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
         }
 	}
 
@@ -177,7 +182,7 @@ open class BACaptchaInput: UIControl {
         return index + 1
     }
 
-	// 获取单个
+	// 创建单个输入框
     fileprivate func createInputTextField(forIndex index: Int) -> BACaptchaInputTextField {
         
         let hasOddNumberOfFields = (fieldsCount % 2 == 1)
@@ -224,6 +229,10 @@ open class BACaptchaInput: UIControl {
             textField.tintColor = UIColor.clear
         }
         
+        if #available(iOS 12.0, *) {
+//            textField.textContentType = .oneTimeCode
+        }
+        
         textField.initalizeUI(forFieldType: fieldDisplayType, normalBorderColor: emptyFieldBorderColor, highlightBorderColor: enteredFieldBorderColor)
         
         return textField
@@ -233,7 +242,15 @@ open class BACaptchaInput: UIControl {
 	override open func becomeFirstResponder() -> Bool {
 		let items = stackView.arrangedSubviews
 			.map({$0 as! BACaptchaInputTextField})
-		return (items.filter({($0.text ?? "").isEmpty}).first ?? items.last)!.becomeFirstResponder()
+        
+        if let item = (items.filter({($0.text ?? "").isEmpty}).first ?? items.last) {
+            item.resignFirstResponder()
+            item.becomeFirstResponder()
+            
+            return true
+        }
+        
+        return false
 	}
 
 	@discardableResult
@@ -247,6 +264,19 @@ open class BACaptchaInput: UIControl {
 		setupUI()
 	}
     
+    // 主动设置验证码
+    private func inputText(text: String) {
+        for idx in text.indices {
+            let a = text[idx]
+            
+            let tag = indexForTag(forIndex: idx.distance(in: text))
+            if let v = viewWithTag(tag) as? UITextField {
+                v.text = String(a)
+            }
+        }
+    }
+    
+    // 验证码退格
     private func deleteText(in textField: UITextField) {
         if let lbl = self.viewWithTag(textField.tag + fieldsCount) as? UILabel {
             lbl.text = ""
@@ -257,6 +287,7 @@ open class BACaptchaInput: UIControl {
         textField.becomeFirstResponder()
     }
 
+    // 检查验证码数目
     fileprivate func check() {
         let captchaCode = code
         if (captchaCode.count == fieldsCount) {
@@ -316,6 +347,8 @@ extension BACaptchaInput: UITextFieldDelegate {
     
 	public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
+        NSLog("变更内容："+string)
+        
         if string.hasSuffix("\n") {
             return false;
         }
@@ -339,7 +372,19 @@ extension BACaptchaInput: UITextFieldDelegate {
             resetFeedback()
         }
         
+        // 如果粘贴的字符串数目刚好等于设置的数目，则直接分开填入
+//        if replacedText.count == fieldsCount {
+//            inputText(text: replacedText)
+//
+//            return false
+//        }
+        
+        ///
         if replacedText.count >= 1 {
+            
+            if replacedText.count > 1 {
+                return false
+            }
    
             if isSecureEntry {
                 
@@ -428,6 +473,7 @@ extension String {
     }
 }
 
+/// UIIMage 的扩展
 extension UIImage {
     
     func imageWithColor(color:UIColor) -> UIImage {
@@ -443,3 +489,17 @@ extension UIImage {
         return UIImage(cgImage: imageFromCurrentContext!.cgImage!, scale: 1.0, orientation:.downMirrored)
     }
 }
+
+/// String.Index的扩展
+
+extension Collection {
+    func distance(to index: Index) -> Int { distance(from: startIndex, to: index) }
+}
+extension StringProtocol {
+    func distance(of element: Element) -> Int? { firstIndex(of: element)?.distance(in: self) }
+    func distance<S: StringProtocol>(of string: S) -> Int? { range(of: string)?.lowerBound.distance(in: self) }
+}
+extension String.Index {
+    func distance<S: StringProtocol>(in string: S) -> Int { string.distance(to: self)}
+}
+
